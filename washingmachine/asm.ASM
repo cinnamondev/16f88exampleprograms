@@ -1,19 +1,20 @@
 ; SET VPIC TO WASHING MACHINE ADDON TO WORK WITH
 
-; Version 2 board settings: J14 links: Digital 
-;::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
-;
-; The following lines embed configuration data into the PICmicro
 	LIST P=16F88
-	__CONFIG H'2007', H'3F7A'       ; RC mode
-	__CONFIG H'2008', H'3FFC'       ; Clock Fail-Safe disabled
+	__CONFIG H'2007', H'3FFA'       ; EXTRCIO, WTDEN disabled, PWRTE disabled,
+	; RA5 is MCLR, BOR enabled, LVP enable, CPD Code prot off,
+	; Write prot off, ICDB disabled, CCP1 on RB0, CP flash prot off.
+	__CONFIG H'2008', H'3FFC'       ; Clock Fail-Safe disabled, 
+	; int.ext switchover disabled.
 
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
 
 				
 #DEFINE	PAGE0	BCF 	STATUS,5	
 #DEFINE	PAGE1	BSF 	STATUS,5	
-				
+
+	; define SFRs
+	
 OPSHUN	EQU	H'81'		;
 STATUS	EQU	H'03'		;defines status register
 TRISA	EQU	H'5'		;defines trisA register
@@ -29,16 +30,14 @@ C      	EQU 	0          	;Sets up the name used for the carry flag
 
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-;       NAME YOUR REGISTERS HERE
-				
-TDELAY	EQU	H'0F'	;names the register called ????????
-;??????	EQU	H'0D'		;names the register called ????????
-;??????	EQU	H'0E'		;names the register called ????????      DELETE THIS SECTION IF NOT USING REGISTERS
-
-;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 ;       VECTORS
-				
+	; vectors are placed in memory not part of program memory,
+	; at these memory locations instructions can be inserted.
+	; FOR EXAMPLE:
+	; ORG 04    ; Interrupt vector
+	; GOTO ISR  ; Interrupt subroutine
+	; Interrupts can be configured to come from various sources, using 
+	; the INTCON register.
 	ORG	00		; Reset vector
 	GOTO	XYZ		; Goto start of program 
 	ORG	04		; Interrupt vector address
@@ -47,10 +46,13 @@ TDELAY	EQU	H'0F'	;names the register called ????????
 		
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-;       THIS SECTION IS USED TO SET THE DIRECTION OF THE OUTPUT PORTS.
+;       NAME YOUR REGISTERS HERE
+				
+TDELAY	EQU	H'0F'
 
-;ENTER the binary number for the Data Direction in the TRIS registers.
-;Use 0 if you would like an output or 1 if you would like an input.
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+;       THIS SECTION IS USED TO SET THE DIRECTION OF THE OUTPUT PORTS.
 
 XYZ	BSF	STATUS,5	;Bank 1 operation
 	CLRF	H'1B'		;Makes the ANSEL (analogue) inputs digital
